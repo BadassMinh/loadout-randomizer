@@ -31,6 +31,27 @@
 
     h1 { margin: 0; font-size: clamp(1.75rem, 5vw, 2.5rem); }
 
+    .roll-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: .75rem;
+    }
+
+    .roll-mode {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      cursor: pointer;
+    }
+
+    .roll-mode input {
+      width: 1rem;
+      height: 1rem;
+      margin: 0;
+      accent-color: #e8d94f;
+    }
+
     button {
       padding: .7rem 1rem;
       border: 0;
@@ -45,6 +66,7 @@
     button:hover { background: #fff078; }
 
     button:focus-visible,
+    input:focus-visible,
     a:focus-visible { outline: 2px solid white; outline-offset: 4px; }
 
     #loadout {
@@ -123,7 +145,13 @@
   <main>
     <header>
       <h1>Loadout Randomizer</h1>
-      <button type="button" id="roll">Randomize</button>
+      <div class="roll-controls">
+        <label class="roll-mode">
+          <input type="checkbox" id="true-random" autocomplete="off">
+          True random
+        </label>
+        <button type="button" id="roll">Randomize</button>
+      </div>
     </header>
     <div id="loadout" aria-live="polite" aria-atomic="true">
       <section aria-labelledby="primary-heading">
@@ -443,6 +471,7 @@
     const primaryResult = document.getElementById("primary");
     const armourResult = document.getElementById("armour");
     const stratagemResults = document.getElementById("stratagems");
+    const trueRandomControl = document.getElementById("true-random");
 
     const randomWord = new Uint32Array(1);
     const randomWordRange = 2 ** 32;
@@ -499,12 +528,17 @@
       showGear(primaryResult, primaries[randomIndex(primaries.length)]);
       showGear(armourResult, armour[randomIndex(armour.length)]);
 
-      const availableGroups = Object.values(stratagemGroups).map(group => [...group]);
+      const colourGroups = Object.values(stratagemGroups);
+      // Use a single pool in true random mode, with equal odds for each remaining item.
+      const availablePools = trueRandomControl.checked
+        ? [colourGroups.flat()]
+        : colourGroups.map(group => [...group]);
       const results = [];
       for (let slot = 0; slot < 4; slot += 1) {
-        // Pick the colour first so pool size does not affect its odds.
-        const group = availableGroups[randomIndex(availableGroups.length)];
-        const [stratagem] = group.splice(randomIndex(group.length), 1);
+        const pool = availablePools.length === 1
+          ? availablePools[0]
+          : availablePools[randomIndex(availablePools.length)];
+        const [stratagem] = pool.splice(randomIndex(pool.length), 1);
         const item = document.createElement("li");
         const name = document.createElement("span");
         name.textContent = stratagem.name;
