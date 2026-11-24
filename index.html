@@ -150,6 +150,10 @@
           <input type="checkbox" id="true-random" autocomplete="off">
           True random
         </label>
+        <label class="roll-mode">
+          <input type="checkbox" id="include-preorder" autocomplete="off">
+          Include pre-order armour
+        </label>
         <button type="button" id="roll">Randomize</button>
       </div>
     </header>
@@ -356,6 +360,8 @@
       { name: "TR-62 Knight", image: "thumb/TR-62_Knight_Armor_Render.png/246px-TR-62_Knight_Armor_Render.png?7b41f4", source: "Pre-Order Bonus", perk: "Servo-Assisted" },
     ];
 
+    const armourWithoutPreOrder = armour.filter(item => item.source !== "Pre-Order Bonus");
+
     const stratagemGroups = {
       blue: [
         // Support weapons
@@ -472,6 +478,7 @@
     const armourResult = document.getElementById("armour");
     const stratagemResults = document.getElementById("stratagems");
     const trueRandomControl = document.getElementById("true-random");
+    const includePreOrderControl = document.getElementById("include-preorder");
 
     const randomWord = new Uint32Array(1);
     const randomWordRange = 2 ** 32;
@@ -526,7 +533,8 @@
 
     function rollLoadout() {
       showGear(primaryResult, primaries[randomIndex(primaries.length)]);
-      showGear(armourResult, armour[randomIndex(armour.length)]);
+      const armourPool = includePreOrderControl.checked ? armour : armourWithoutPreOrder;
+      showGear(armourResult, armourPool[randomIndex(armourPool.length)]);
 
       const colourGroups = Object.values(stratagemGroups);
       // Use a single pool in true random mode, with equal odds for each remaining item.
