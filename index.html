@@ -415,10 +415,10 @@
         { name: "SH-32 Shield Generator Pack", image: "Shield_Generator_Pack_Stratagem_Icon_Background.svg?2f4980" },
         { name: "SH-51 Directional Shield", image: "Directional_Shield_Stratagem_Icon_Background.svg?a0bd68" },
         // Vehicles
-        { name: "EXO-45 Patriot Exosuit", image: "Patriot_Exosuit_Stratagem_Icon_Background.svg?3fa7de" },
-        { name: "EXO-49 Emancipator Exosuit", image: "Emancipator_Exosuit_Stratagem_Icon_Background.svg?336419" },
-        { name: "EXO-51 Lumberer Exosuit", image: "Lumberer_Exosuit_Stratagem_Icon_Background.svg?c3895f" },
-        { name: "EXO-55 Breakthrough Exosuit", image: "Breakthrough_Exosuit_Stratagem_Icon_Background.svg?d9bc7c" },
+        { name: "EXO-45 Patriot Exosuit", image: "Patriot_Exosuit_Stratagem_Icon_Background.svg?3fa7de", exosuit: true },
+        { name: "EXO-49 Emancipator Exosuit", image: "Emancipator_Exosuit_Stratagem_Icon_Background.svg?336419", exosuit: true },
+        { name: "EXO-51 Lumberer Exosuit", image: "Lumberer_Exosuit_Stratagem_Icon_Background.svg?c3895f", exosuit: true },
+        { name: "EXO-55 Breakthrough Exosuit", image: "Breakthrough_Exosuit_Stratagem_Icon_Background.svg?d9bc7c", exosuit: true },
         { name: "M-102 Gunner FRV", image: "Fast_Recon_Vehicle_Stratagem_Icon_Background.svg?d9bba1" },
         { name: "M-103 Supply FRV", image: "Supply_FRV_Stratagem_Icon_Background.svg?415445" },
         { name: "M-104 Incinerator FRV", image: "Incinerator_FRV_Stratagem_Icon_Background.svg?f5764f" },
@@ -537,16 +537,18 @@
       showGear(armourResult, armourPool[randomIndex(armourPool.length)]);
 
       const colourGroups = Object.values(stratagemGroups);
-      // Use a single pool in true random mode, with equal odds for each remaining item.
+      // Use a single pool in true random mode, with equal odds for each eligible item.
       const availablePools = trueRandomControl.checked
         ? [colourGroups.flat()]
         : colourGroups.map(group => [...group]);
       const results = [];
       for (let slot = 0; slot < 4; slot += 1) {
-        const pool = availablePools.length === 1
-          ? availablePools[0]
-          : availablePools[randomIndex(availablePools.length)];
+        const poolIndex = availablePools.length === 1 ? 0 : randomIndex(availablePools.length);
+        const pool = availablePools[poolIndex];
         const [stratagem] = pool.splice(randomIndex(pool.length), 1);
+        if (stratagem.exosuit) {
+          availablePools[poolIndex] = pool.filter(item => !item.exosuit);
+        }
         const item = document.createElement("li");
         const name = document.createElement("span");
         name.textContent = stratagem.name;
